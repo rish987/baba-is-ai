@@ -23,7 +23,9 @@ objects = [
     'fwall',
     'fdoor',
     "fkey",
-    'baba'
+    'baba',
+    'frock',
+    'fflag'
 ]
 
 name_mapping = {
@@ -31,6 +33,8 @@ name_mapping = {
     'fball': 'ball',
     'fdoor': 'door',
     'fkey': 'key',
+    'frock': 'rock',
+    'fflag': 'flag',
     'is_push': 'push',
     'is_stop': 'stop',
     'is_goal': 'win',
@@ -118,6 +122,10 @@ def make_obj(name: str, color: str = None):
         obj_cls = FDoor
     elif name == "baba":
         obj_cls = Baba
+    elif name == "frock" or name == "rock":
+        obj_cls = FRock
+    elif name == "fflag" or name == "flag":
+        obj_cls = FFlag
     else:
         raise ValueError(name)
 
@@ -396,6 +404,23 @@ class FBall(FlexibleWorldObj):
 
     def render(self, img):
         fill_coords(img, point_in_circle(0.5, 0.5, 0.31), COLORS[self.color])
+
+
+class FRock(FlexibleWorldObj):
+    def __init__(self, color="yellow"):
+        super().__init__("frock", color)
+
+    def render(self, img):
+        fill_coords(img, point_in_circle(0.5, 0.5, 0.31), COLORS[self.color])
+
+
+class FFlag(FlexibleWorldObj):
+    def __init__(self, color="yellow"):
+        super().__init__("fflag", color)
+
+    def render(self, img):
+        fill_coords(img, point_in_rect(0.40, 0.55, 0.20, 0.80), COLORS[self.color])
+        fill_coords(img, point_in_rect(0.55, 0.80, 0.20, 0.45), COLORS[self.color])
 
 
 class FDoor(FlexibleWorldObj):

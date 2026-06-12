@@ -911,6 +911,35 @@ class TwoRoomMakeWallWinEnv(BabaIsYouEnv):
         self.target_plan = f"break[wall is stop], make[wall is win], goto[wall]"
 
 
+@register("env/map00-baba_is_you")
+class Map00BabaIsYouEnv(BabaIsYouEnv):
+    """Faithful port of Map level 00 'Baba Is You' (puzzle-equivalent on a compact
+    deterministic grid): a 3-row room with Baba on the left, a vertical line of 3
+    rocks in the center, and the flag on the right, with BABA IS YOU / FLAG IS WIN
+    / WALL IS STOP / ROCK IS PUSH all active. Solve: walk right, pushing the middle
+    rock along to reach the flag."""
+
+    def __init__(self, width=13, height=7, **kwargs):
+        super().__init__(width=width, height=height, **kwargs)
+
+    def _gen_grid(self, width, height, params=None):
+        self.grid = BabaIsYouGrid(width, height)
+        self.grid.wall_rect(0, 0, width, height)
+        # Active rules (placed outside the room band, rows 1 and 5).
+        put_rule(self, "baba", "you", positions=(1, 1))
+        put_rule(self, "flag", "win", positions=(7, 1))
+        put_rule(self, "wall", "stop", positions=(1, 5))
+        put_rule(self, "rock", "push", positions=(7, 5))
+        # Room band (row 3 is the player's row).
+        put_obj(self, "baba", (2, 3))
+        put_obj(self, "rock", (6, 2))
+        put_obj(self, "rock", (6, 3))
+        put_obj(self, "rock", (6, 4))
+        put_obj(self, "flag", (10, 3))
+        self.active_rules = ["baba is you", "flag is win", "wall is stop", "rock is push"]
+        self.target_plan = "goto[flag]"
+
+
 if __name__ == "__main__":
     # env = make("env/goto_win-no_distractor")
     # env = make("env/make_win-no_distractor_rule")
