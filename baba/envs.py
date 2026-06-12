@@ -5,7 +5,7 @@ import numpy as np
 
 from baba.grid import BabaIsYouGrid, BabaIsYouEnv, put_rule, place_rule
 from baba.play import play
-from baba.world_object import FBall, Baba, make_obj, RuleObject, Wall
+from baba.world_object import FBall, Baba, make_obj, RuleObject, RuleIs, RuleProperty, Wall
 from baba import make, register
 
 
@@ -909,6 +909,34 @@ class TwoRoomMakeWallWinEnv(BabaIsYouEnv):
             place_obj(self, obj2, **self.obj2_pos)
 
         self.target_plan = f"break[wall is stop], make[wall is win], goto[wall]"
+
+
+@register("env/map01-where_do_i_go")
+class Map01WhereDoIGoEnv(BabaIsYouEnv):
+    """Faithful-essence port of Map level 01 'Where Do I Go?' focusing on its new
+    mechanic — rule *making*. Active: BABA IS YOU, WALL IS STOP (border walls keep
+    Baba in). Loose FLAG, IS, WIN word tiles sit one push from alignment; assemble
+    FLAG IS WIN, then walk onto the flag object. Solve: up, up, down, down, right,
+    right (push WIN up to form the rule, then reach the flag)."""
+
+    def __init__(self, width=11, height=9, **kwargs):
+        super().__init__(width=width, height=height, **kwargs)
+
+    def _gen_grid(self, width, height, params=None):
+        self.grid = BabaIsYouGrid(width, height)
+        self.grid.wall_rect(0, 0, width, height)
+        # Active rules.
+        put_rule(self, "baba", "you", positions=(1, 7))
+        put_rule(self, "wall", "stop", positions=(5, 7))
+        # Loose tiles for FLAG IS WIN: FLAG·IS aligned at row 2; WIN one below.
+        put_obj(self, RuleObject("flag"), (3, 2))
+        put_obj(self, RuleIs(), (4, 2))
+        put_obj(self, RuleProperty("win"), (5, 3))
+        # Objects.
+        put_obj(self, "flag", (7, 5))
+        put_obj(self, "baba", (5, 5))
+        self.active_rules = ["baba is you", "wall is stop"]
+        self.target_plan = "make[flag is win], goto[flag]"
 
 
 @register("env/map00-baba_is_you")
