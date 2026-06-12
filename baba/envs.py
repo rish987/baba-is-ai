@@ -911,6 +911,30 @@ class TwoRoomMakeWallWinEnv(BabaIsYouEnv):
         self.target_plan = f"break[wall is stop], make[wall is win], goto[wall]"
 
 
+@register("env/map02-now_what_is_this")
+class Map02NowWhatIsThisEnv(BabaIsYouEnv):
+    """Faithful-essence port of Map 02 'Now What Is This?' — a remix of 01 with
+    nouns shuffled: WALL IS YOU (you control a wall object), FLAG IS STOP (flags
+    block). Break FLAG IS STOP and assemble FLAG IS WIN, then touch the flag.
+    WALL IS YOU is placed non-pushable (it's not meant to be disturbed)."""
+
+    def __init__(self, width=9, height=7, **kwargs):
+        super().__init__(width=width, height=height, **kwargs)
+
+    def _gen_grid(self, width, height, params=None):
+        self.grid = BabaIsYouGrid(width, height)
+        self.grid.wall_rect(0, 0, width, height)
+        put_rule(self, "wall", "you", positions=(5, 5), is_push=False)  # fixed control
+        # FLAG IS STOP at row 2; loose WIN sits below STOP so one upward push
+        # chains STOP out (break) and lands WIN in its place (make FLAG IS WIN).
+        put_rule(self, "flag", "stop", positions=(1, 2))
+        put_obj(self, RuleProperty("win"), (3, 4))
+        put_obj(self, "flag", (5, 3))
+        put_obj(self, "wall", (3, 5))                                   # the you-object
+        self.active_rules = ["wall is you", "flag is stop"]
+        self.target_plan = "break[flag is stop]+make[flag is win], goto[flag]"
+
+
 @register("env/map01-where_do_i_go")
 class Map01WhereDoIGoEnv(BabaIsYouEnv):
     """Faithful-essence port of Map level 01 'Where Do I Go?' focusing on its new
