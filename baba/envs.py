@@ -911,6 +911,112 @@ class TwoRoomMakeWallWinEnv(BabaIsYouEnv):
         self.target_plan = f"break[wall is stop], make[wall is win], goto[wall]"
 
 
+@register("env/map07-grass_yard")
+class Map07GrassYardEnv(BabaIsYouEnv):
+    """Faithful-essence port of Map 07 'Grass Yard' — rule-making with a shared IS
+    (plus shape). BABA IS YOU (horizontal) and GRASS IS STOP active. FLAG sits
+    above the shared IS; push WIN up below it to form FLAG IS WIN *vertically*
+    through that IS, then reach the flag. Solve: up (form FLAG IS WIN), right, right."""
+
+    def __init__(self, width=11, height=9, **kwargs):
+        super().__init__(width=width, height=height, **kwargs)
+
+    def _gen_grid(self, width, height, params=None):
+        self.grid = BabaIsYouGrid(width, height)
+        self.grid.wall_rect(0, 0, width, height)
+        put_rule(self, "baba", "you", positions=(3, 3), is_push=False)   # IS shared at (4,3)
+        put_rule(self, "grass", "stop", positions=(1, 1), is_push=False)
+        put_obj(self, RuleObject("flag"), (4, 2))    # FLAG above the shared IS
+        put_obj(self, RuleProperty("win"), (4, 5))   # loose WIN, push up to (4,4)
+        put_obj(self, "flag", (6, 5))
+        put_obj(self, "baba", (4, 6))
+        self.active_rules = ["baba is you", "grass is stop"]
+        self.target_plan = "make[flag is win] (shared IS), goto[flag]"
+
+
+@register("env/map06-off_limits")
+class Map06OffLimitsEnv(BabaIsYouEnv):
+    """Faithful-essence port of Map 06 'Off Limits' — control transfer via making
+    WALL IS YOU. BABA IS YOU and FLAG IS WIN active. Baba can't reach the flag,
+    but a wall object sits next to it. Form WALL IS YOU (push the YOU word into
+    place); now the wall is YOU too, and one move steps it onto the flag.
+    Solve: up (form WALL IS YOU), right (wall-you reaches the flag)."""
+
+    def __init__(self, width=11, height=7, **kwargs):
+        super().__init__(width=width, height=height, **kwargs)
+
+    def _gen_grid(self, width, height, params=None):
+        self.grid = BabaIsYouGrid(width, height)
+        self.grid.wall_rect(0, 0, width, height)
+        put_rule(self, "baba", "you", positions=(1, 5), is_push=False)
+        put_rule(self, "flag", "win", positions=(5, 5), is_push=False)
+        # WALL·IS aligned at row 2; loose YOU one push below -> form WALL IS YOU.
+        put_obj(self, RuleObject("wall"), (1, 2))
+        put_obj(self, RuleIs(), (2, 2))
+        put_obj(self, RuleProperty("you"), (3, 3))
+        # A wall object next to the flag; Baba to push the YOU word.
+        put_obj(self, "wall", (6, 3))
+        put_obj(self, "flag", (7, 3))
+        put_obj(self, "baba", (3, 4))
+        self.active_rules = ["baba is you", "flag is win"]
+        self.target_plan = "make[wall is you], move wall onto flag"
+
+
+@register("env/map05-volcano")
+class Map05VolcanoEnv(BabaIsYouEnv):
+    """Faithful-essence port of Map 05 'Volcano' — HOT/MELT. LAVA IS HOT and
+    BABA IS MELT active (so Baba can't touch the lava). A loose MELT one push from
+    a second LAVA·IS forms LAVA IS MELT; then the lava is hot AND melt, so it
+    evaporates, clearing the corridor to the flag.
+    Solve: right, up (form LAVA IS MELT -> evaporate), down, right, right, right."""
+
+    def __init__(self, width=13, height=9, **kwargs):
+        super().__init__(width=width, height=height, **kwargs)
+
+    def _gen_grid(self, width, height, params=None):
+        self.grid = BabaIsYouGrid(width, height)
+        self.grid.wall_rect(0, 0, width, height)
+        put_rule(self, "lava", "hot", positions=(8, 1), is_push=False)
+        put_rule(self, "baba", "you", positions=(8, 3), is_push=False)
+        put_rule(self, "baba", "melt", positions=(8, 5), is_push=False)
+        put_rule(self, "flag", "win", positions=(8, 7), is_push=False)
+        # LAVA·IS aligned at row 1; loose MELT one push below -> form LAVA IS MELT.
+        put_obj(self, RuleObject("lava"), (1, 1))
+        put_obj(self, RuleIs(), (2, 1))
+        put_obj(self, RuleProperty("melt"), (3, 2))
+        # Corridor (row 3): Baba, the lava river, the flag.
+        put_obj(self, "lava", (4, 3))
+        put_obj(self, "flag", (6, 3))
+        put_obj(self, "baba", (2, 3))
+        self.active_rules = ["lava is hot", "baba is you", "baba is melt", "flag is win"]
+        self.target_plan = "make[lava is melt]->evaporate, goto[flag]"
+
+
+@register("env/map04-still_out_of_reach")
+class Map04StillOutOfReachEnv(BabaIsYouEnv):
+    """Faithful-essence port of Map 04 'Still Out of Reach' — DEFEAT. Rules
+    BABA IS YOU, ROCK IS PUSH, SKULL IS DEFEAT, FLAG IS WIN. A skull (defeat)
+    sits in the corridor; stepping on it while DEFEAT would kill you, so break
+    SKULL IS DEFEAT (push DEFEAT out), then walk through to the flag.
+    Solve: up (break), right, right, right, right."""
+
+    def __init__(self, width=11, height=7, **kwargs):
+        super().__init__(width=width, height=height, **kwargs)
+
+    def _gen_grid(self, width, height, params=None):
+        self.grid = BabaIsYouGrid(width, height)
+        self.grid.wall_rect(0, 0, width, height)
+        put_rule(self, "rock", "push", positions=(1, 1), is_push=False)
+        put_rule(self, "baba", "you", positions=(1, 5), is_push=False)
+        put_rule(self, "flag", "win", positions=(5, 5), is_push=False)
+        put_rule(self, "skull", "lose", positions=(1, 3))   # "lose" = is_defeat; breakable
+        put_obj(self, "skull", (5, 3))
+        put_obj(self, "flag", (7, 3))
+        put_obj(self, "baba", (3, 4))
+        self.active_rules = ["baba is you", "rock is push", "skull is defeat", "flag is win"]
+        self.target_plan = "break[skull is defeat], goto[flag]"
+
+
 @register("env/map03-out_of_reach")
 class Map03OutOfReachEnv(BabaIsYouEnv):
     """Faithful-essence port of Map 03 'Out of Reach', introducing SINK. Rules

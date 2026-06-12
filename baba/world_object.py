@@ -16,7 +16,9 @@ properties = [
     'is_move',
     'is_open',
     'is_shut',
-    'is_sink'
+    'is_sink',
+    'is_hot',
+    'is_melt'
 ]
 
 objects = [
@@ -27,7 +29,10 @@ objects = [
     'baba',
     'frock',
     'fflag',
-    'fwater'
+    'fwater',
+    'fskull',
+    'flava',
+    'fgrass'
 ]
 
 name_mapping = {
@@ -38,7 +43,12 @@ name_mapping = {
     'frock': 'rock',
     'fflag': 'flag',
     'fwater': 'water',
+    'fskull': 'skull',
+    'flava': 'lava',
+    'fgrass': 'grass',
     'is_sink': 'sink',
+    'is_hot': 'hot',
+    'is_melt': 'melt',
     'is_push': 'push',
     'is_stop': 'stop',
     'is_goal': 'win',
@@ -132,6 +142,12 @@ def make_obj(name: str, color: str = None):
         obj_cls = FFlag
     elif name == "fwater" or name == "water":
         obj_cls = FWater
+    elif name == "fskull" or name == "skull":
+        obj_cls = FSkull
+    elif name == "flava" or name == "lava":
+        obj_cls = FLava
+    elif name == "fgrass" or name == "grass":
+        obj_cls = FGrass
     else:
         raise ValueError(name)
 
@@ -435,6 +451,30 @@ class FWater(FlexibleWorldObj):
 
     def render(self, img):
         fill_coords(img, point_in_rect(0.10, 0.90, 0.10, 0.90), COLORS[self.color])
+
+
+class FSkull(FlexibleWorldObj):
+    def __init__(self, color="red"):
+        super().__init__("fskull", color)
+
+    def render(self, img):
+        fill_coords(img, point_in_circle(0.5, 0.5, 0.31), COLORS[self.color])
+
+
+class FLava(FlexibleWorldObj):
+    def __init__(self, color="red"):
+        super().__init__("flava", color)
+
+    def render(self, img):
+        fill_coords(img, point_in_rect(0.10, 0.90, 0.10, 0.90), COLORS[self.color])
+
+
+class FGrass(FlexibleWorldObj):
+    def __init__(self, color="green"):
+        super().__init__("fgrass", color)
+
+    def render(self, img):
+        fill_coords(img, point_in_rect(0.20, 0.80, 0.20, 0.80), COLORS[self.color])
 
 
 class FDoor(FlexibleWorldObj):

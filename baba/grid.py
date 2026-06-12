@@ -744,6 +744,20 @@ class BabaIsYouEnv(gym.Env):
             if len(objs) >= 2 and any(is_sink(o) for o in objs):
                 self.grid.grid[idx] = [None]
 
+    def apply_melt(self):
+        """Resolve HOT/MELT: in any cell containing a `hot` object, destroy every
+        `melt` object (covers melt-on-hot and self-destruct when hot and melt)."""
+        def is_hot(o):
+            return o is not None and hasattr(o, 'is_hot') and o.is_hot()
+        def is_melt(o):
+            return o is not None and hasattr(o, 'is_melt') and o.is_melt()
+
+        for idx in range(len(self.grid.grid)):
+            cell = self.grid.grid[idx]
+            if any(is_hot(o) for o in cell):
+                new = [o for o in cell if (o is None) or (not is_melt(o))]
+                self.grid.grid[idx] = new if new else [None]
+
     def try_open_shut(self, pos, new_pos):
         """
         Check if an open is moving towards a shut obj or vice versa, if so destroy the objects
@@ -874,6 +888,11 @@ class BabaIsYouEnv(gym.Env):
             # resolve SINK: any cell holding a sink object together with another
             # object destroys everything in that cell
             self.apply_sink()
+
+            # resolve HOT/MELT: in any cell containing a hot object, all melt
+            # objects are destroyed (an object that is both hot and melt destroys
+            # itself, e.g. lava that is made melt while it is hot)
+            self.apply_melt()
 
             # win/lose based on the rules active in the env
             self.is_win = is_win
