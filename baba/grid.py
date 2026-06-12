@@ -733,6 +733,17 @@ class BabaIsYouEnv(gym.Env):
         new_cell = self.grid.get(*pos)
         return new_cell is not None and new_cell.is_defeat()
 
+    def apply_sink(self):
+        """Resolve the SINK property: any cell containing a `sink` object along
+        with at least one other object destroys all objects in that cell."""
+        def is_sink(o):
+            return o is not None and hasattr(o, 'is_sink') and o.is_sink()
+
+        for idx in range(len(self.grid.grid)):
+            objs = [o for o in self.grid.grid[idx] if o is not None]
+            if len(objs) >= 2 and any(is_sink(o) for o in objs):
+                self.grid.grid[idx] = [None]
+
     def try_open_shut(self, pos, new_pos):
         """
         Check if an open is moving towards a shut obj or vice versa, if so destroy the objects
@@ -859,6 +870,10 @@ class BabaIsYouEnv(gym.Env):
             # TODO: handle conflicts
             # for (pos, new_pos) in movements:
             #     self.change_obj_pos(pos, new_pos)
+
+            # resolve SINK: any cell holding a sink object together with another
+            # object destroys everything in that cell
+            self.apply_sink()
 
             # win/lose based on the rules active in the env
             self.is_win = is_win

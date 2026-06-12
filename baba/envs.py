@@ -911,6 +911,33 @@ class TwoRoomMakeWallWinEnv(BabaIsYouEnv):
         self.target_plan = f"break[wall is stop], make[wall is win], goto[wall]"
 
 
+@register("env/map03-out_of_reach")
+class Map03OutOfReachEnv(BabaIsYouEnv):
+    """Faithful-essence port of Map 03 'Out of Reach', introducing SINK. Rules
+    BABA IS YOU, WALL IS STOP, WATER IS SINK, ROCK IS PUSH, FLAG IS WIN all
+    active. A water tile blocks the corridor to the flag; push the rock into the
+    water (both sink), clearing the path, then walk to the flag. Solve: 5x right."""
+
+    def __init__(self, width=13, height=9, **kwargs):
+        super().__init__(width=width, height=height, **kwargs)
+
+    def _gen_grid(self, width, height, params=None):
+        self.grid = BabaIsYouGrid(width, height)
+        self.grid.wall_rect(0, 0, width, height)
+        for obj, prop, pos in [("baba", "you", (1, 1)), ("wall", "stop", (5, 1)),
+                               ("flag", "win", (9, 1)), ("water", "sink", (1, 7)),
+                               ("rock", "push", (5, 7))]:
+            put_rule(self, obj, prop, positions=pos, is_push=False)
+        # Corridor (row 4): Baba, a pushable rock, the water that blocks, the flag.
+        put_obj(self, "baba", (2, 4))
+        put_obj(self, "rock", (3, 4))
+        put_obj(self, "water", (4, 4))
+        put_obj(self, "flag", (7, 4))
+        self.active_rules = ["baba is you", "wall is stop", "water is sink",
+                             "rock is push", "flag is win"]
+        self.target_plan = "sink[rock->water], goto[flag]"
+
+
 @register("env/map02-now_what_is_this")
 class Map02NowWhatIsThisEnv(BabaIsYouEnv):
     """Faithful-essence port of Map 02 'Now What Is This?' — a remix of 01 with

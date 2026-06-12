@@ -15,7 +15,8 @@ properties = [
     'is_pull',
     'is_move',
     'is_open',
-    'is_shut'
+    'is_shut',
+    'is_sink'
 ]
 
 objects = [
@@ -25,7 +26,8 @@ objects = [
     "fkey",
     'baba',
     'frock',
-    'fflag'
+    'fflag',
+    'fwater'
 ]
 
 name_mapping = {
@@ -35,6 +37,8 @@ name_mapping = {
     'fkey': 'key',
     'frock': 'rock',
     'fflag': 'flag',
+    'fwater': 'water',
+    'is_sink': 'sink',
     'is_push': 'push',
     'is_stop': 'stop',
     'is_goal': 'win',
@@ -126,6 +130,8 @@ def make_obj(name: str, color: str = None):
         obj_cls = FRock
     elif name == "fflag" or name == "flag":
         obj_cls = FFlag
+    elif name == "fwater" or name == "water":
+        obj_cls = FWater
     else:
         raise ValueError(name)
 
@@ -421,6 +427,14 @@ class FFlag(FlexibleWorldObj):
     def render(self, img):
         fill_coords(img, point_in_rect(0.40, 0.55, 0.20, 0.80), COLORS[self.color])
         fill_coords(img, point_in_rect(0.55, 0.80, 0.20, 0.45), COLORS[self.color])
+
+
+class FWater(FlexibleWorldObj):
+    def __init__(self, color="blue"):
+        super().__init__("fwater", color)
+
+    def render(self, img):
+        fill_coords(img, point_in_rect(0.10, 0.90, 0.10, 0.90), COLORS[self.color])
 
 
 class FDoor(FlexibleWorldObj):
