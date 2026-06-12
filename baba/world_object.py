@@ -32,7 +32,8 @@ objects = [
     'fwater',
     'fskull',
     'flava',
-    'fgrass'
+    'fgrass',
+    'ftile'
 ]
 
 name_mapping = {
@@ -46,6 +47,7 @@ name_mapping = {
     'fskull': 'skull',
     'flava': 'lava',
     'fgrass': 'grass',
+    'ftile': 'tile',
     'is_sink': 'sink',
     'is_hot': 'hot',
     'is_melt': 'melt',
@@ -148,6 +150,8 @@ def make_obj(name: str, color: str = None):
         obj_cls = FLava
     elif name == "fgrass" or name == "grass":
         obj_cls = FGrass
+    elif name == "ftile" or name == "tile":
+        obj_cls = FTile
     else:
         raise ValueError(name)
 
@@ -475,6 +479,16 @@ class FGrass(FlexibleWorldObj):
 
     def render(self, img):
         fill_coords(img, point_in_rect(0.20, 0.80, 0.20, 0.80), COLORS[self.color])
+
+
+class FTile(FlexibleWorldObj):
+    """Decorative floor tile (no TILE text exists in Map 00, so no rule can
+    ever affect it - pure decoration, walkable)."""
+    def __init__(self, color="grey"):
+        super().__init__("ftile", color)
+
+    def render(self, img):
+        fill_coords(img, point_in_rect(0.08, 0.92, 0.08, 0.92), (35, 35, 45))
 
 
 class FDoor(FlexibleWorldObj):

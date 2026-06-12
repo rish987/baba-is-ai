@@ -1098,29 +1098,39 @@ class Map01WhereDoIGoEnv(BabaIsYouEnv):
 
 @register("env/map00-baba_is_you")
 class Map00BabaIsYouEnv(BabaIsYouEnv):
-    """Faithful port of Map level 00 'Baba Is You' (puzzle-equivalent on a compact
-    deterministic grid): a 3-row room with Baba on the left, a vertical line of 3
-    rocks in the center, and the flag on the right, with BABA IS YOU / FLAG IS WIN
-    / WALL IS STOP / ROCK IS PUSH all active. Solve: walk right, pushing the middle
-    rock along to reach the flag."""
+    """Faithful transcription of Map level 00 'Baba Is You' from the wiki
+    preview (33x18, babaiswiki.fandom.com Island-00). Rules (row 6): BABA IS
+    YOU, FLAG IS WIN; (row 14): WALL IS STOP, ROCK IS PUSH. A corridor bounded
+    by wall rows at y=8 and y=12 (x=11..21, sides open), carpeted with
+    decorative tiles, holds baba (12,10), a rock column at x=16 (rows 9-11)
+    and the flag (20,10). Solve: 8x right (pushing the middle rock; the rock
+    crosses the flag's cell on the way)."""
 
-    def __init__(self, width=13, height=7, **kwargs):
+    def __init__(self, width=33, height=18, **kwargs):
         super().__init__(width=width, height=height, **kwargs)
 
     def _gen_grid(self, width, height, params=None):
         self.grid = BabaIsYouGrid(width, height)
         self.grid.wall_rect(0, 0, width, height)
-        # Active rules (placed outside the room band, rows 1 and 5).
-        put_rule(self, "baba", "you", positions=(1, 1))
-        put_rule(self, "flag", "win", positions=(7, 1))
-        put_rule(self, "wall", "stop", positions=(1, 5))
-        put_rule(self, "rock", "push", positions=(7, 5))
-        # Room band (row 3 is the player's row).
-        put_obj(self, "baba", (2, 3))
-        put_obj(self, "rock", (6, 2))
-        put_obj(self, "rock", (6, 3))
-        put_obj(self, "rock", (6, 4))
-        put_obj(self, "flag", (10, 3))
+        # decorative tile carpet (no TILE text in the level: provably inert)
+        for x in range(11, 22):
+            for y in range(9, 12):
+                put_obj(self, "tile", (x, y))
+        # room walls: rows 8 and 12, x = 11..21 (sides open, as in the level)
+        for x in range(11, 22):
+            put_obj(self, "wall", (x, 8))
+            put_obj(self, "wall", (x, 12))
+        # rules (all text pushable, as in the real game)
+        put_rule(self, "baba", "you", positions=(11, 6))
+        put_rule(self, "flag", "win", positions=(19, 6))
+        put_rule(self, "wall", "stop", positions=(11, 14))
+        put_rule(self, "rock", "push", positions=(19, 14))
+        # objects
+        put_obj(self, "rock", (16, 9))
+        put_obj(self, "rock", (16, 10))
+        put_obj(self, "rock", (16, 11))
+        put_obj(self, "baba", (12, 10))
+        put_obj(self, "flag", (20, 10))
         self.active_rules = ["baba is you", "flag is win", "wall is stop", "rock is push"]
         self.target_plan = "goto[flag]"
 
